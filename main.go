@@ -12,25 +12,26 @@ type User struct {
 }
 
 var users []User
+var loginAttempts = make(map[string]int)
 
 func register(c *gin.Context) {
 	var input User
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Dữ liệu không hợp"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Dữ liệu không hợp lệ"})
 		return
 	}
 
 	for _, u := range users {
-		if u.Username == input.Username {
+		if u.Username == input.Username && u.Password == input.Password {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "User đã tồn tại"})
 			return
 		}
 	}
-	users = append(users, input)
 
+	users = append(users, input)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Đăng ký thành công",
+		"message" : "Tạo thông tin thành công",
 	})
 }
 
@@ -41,16 +42,30 @@ func login(c *gin.Context) {
 		return
 	}
 
+	//kiem tra spam
+	if loginAttempts[input.Username] >= 5 {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"message" : "Spam quá nhiều lần, thử lại sau",
+		})
+		return
+	}
+
+
 	for _, u := range users {
 		if u.Username == input.Username && u.Password == input.Password {
+
+			loginAttempts[input.Username] = 0
 			c.JSON(http.StatusOK, gin.H{
 				"message": "Đăng nhập thành công",
 			})
 			return
 		}
 	}
+
+	loginAttempts[input.Username]++
 	c.JSON(http.StatusUnauthorized, gin.H{
-		"message": "Sai tài khoản hoặc mật khẩu",
+		"message": "Đăng nhập thất bại",
+		"attempts": loginAttempts[input.Username],
 	})
 }
 
@@ -67,7 +82,7 @@ func deleteUser(c *gin.Context) {
 		if u.Username == name {
 			users = append(users[:i], users[i+1:]...)
 			c.JSON(http.StatusOK, gin.H{
-				"message": "đã xóa user",
+				"message": "Đã xóa user",
 			})
 			return
 		}
@@ -85,5 +100,3 @@ func main() {
 	r.DELETE("/users/:name", deleteUser)
 	r.Run(":8080")
 }
-
-//
