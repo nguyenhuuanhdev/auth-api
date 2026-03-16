@@ -2,16 +2,19 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type User struct {
+	ID int `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 var users []User
+var nextID = 1
 var loginAttempts = make(map[string]int)
 
 func register(c *gin.Context) {
@@ -23,12 +26,14 @@ func register(c *gin.Context) {
 	}
 
 	for _, u := range users {
-		if u.Username == input.Username && u.Password == input.Password {
+		if u.Username == input.Username {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "User đã tồn tại"})
 			return
 		}
 	}
 
+	input.ID = nextID
+	nextID++
 	users = append(users, input)
 	c.JSON(http.StatusOK, gin.H{
 		"message" : "Tạo thông tin thành công",
@@ -70,16 +75,41 @@ func login(c *gin.Context) {
 }
 
 func getUsers(c *gin.Context) {
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message" : "Không có thông tin",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, users)
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Lấy thông tin thành công",
+}
+
+
+
+func getUserID(c * gin.Context) {
+	idParam := c.Param("id")
+
+	id, _ := strconv.Atoi(idParam)
+	for _, u := range users {
+		if u.ID == id {
+			c.JSON(http.StatusOK, gin.H{
+				"message" : "Đã tìm thấy id",
+			})
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{
+		"message" : "Không tìm thấy id",
 	})
 }
 
+
+
 func deleteUser(c *gin.Context) {
-	name := c.Param("name")
+	id := c.Param("id")
+	idInt, _ := strconv.Atoi(id)
 	for i, u := range users {
-		if u.Username == name {
+		if u.ID == idInt {
 			users = append(users[:i], users[i+1:]...)
 			c.JSON(http.StatusOK, gin.H{
 				"message": "Đã xóa user",
@@ -97,6 +127,7 @@ func main() {
 	r.POST("/register", register)
 	r.POST("/login", login)
 	r.GET("/users", getUsers)
-	r.DELETE("/users/:name", deleteUser)
+	r.GET("/user/:id", getUserID)
+	r.DELETE("/user/:id", deleteUser)
 	r.Run(":8080")
 }
