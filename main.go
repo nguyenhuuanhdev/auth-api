@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID int `json:"id"`
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -36,7 +36,7 @@ func register(c *gin.Context) {
 	nextID++
 	users = append(users, input)
 	c.JSON(http.StatusOK, gin.H{
-		"message" : "Tạo thông tin thành công",
+		"message": "Tạo thông tin thành công",
 	})
 }
 
@@ -50,11 +50,10 @@ func login(c *gin.Context) {
 	//kiem tra spam
 	if loginAttempts[input.Username] >= 5 {
 		c.JSON(http.StatusTooManyRequests, gin.H{
-			"message" : "Spam quá nhiều lần, thử lại sau",
+			"message": "Spam quá nhiều lần, thử lại sau",
 		})
 		return
 	}
-
 
 	for _, u := range users {
 		if u.Username == input.Username && u.Password == input.Password {
@@ -69,7 +68,7 @@ func login(c *gin.Context) {
 
 	loginAttempts[input.Username]++
 	c.JSON(http.StatusUnauthorized, gin.H{
-		"message": "Đăng nhập thất bại",
+		"message":  "Đăng nhập thất bại",
 		"attempts": loginAttempts[input.Username],
 	})
 }
@@ -77,29 +76,27 @@ func login(c *gin.Context) {
 func getUsers(c *gin.Context) {
 	if len(users) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message" : "Không có thông tin",
+			"message": "Không có thông tin user",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, users)
 }
 
-
-
-func getUserID(c * gin.Context) {
+func getUserID(c *gin.Context) {
 	idParam := c.Param("id")
 
 	id, _ := strconv.Atoi(idParam)
 	for _, u := range users {
 		if u.ID == id {
 			c.JSON(http.StatusOK, gin.H{
-				"message" : "Đã tìm thấy id",
+				"message": "Đã tìm thấy id",
 			})
 			return
 		}
 	}
 	c.JSON(http.StatusNotFound, gin.H{
-		"message" : "Không tìm thấy id",
+		"message": "Không tìm thấy id",
 	})
 }
 
