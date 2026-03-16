@@ -103,8 +103,6 @@ func getUserID(c * gin.Context) {
 	})
 }
 
-
-
 func deleteUser(c *gin.Context) {
 	id := c.Param("id")
 	idInt, _ := strconv.Atoi(id)
