@@ -85,7 +85,7 @@ func getUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// get user by id
+
 func getUserID(c *gin.Context) {
 	idParam := c.Param("id")
 
