@@ -11,6 +11,7 @@ type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Age int `json:"age"`
 }
 
 var users []User
@@ -72,7 +73,7 @@ func login(c *gin.Context) {
 		"attempts": loginAttempts[input.Username],
 	})
 }
-
+//get users
 func getUsers(c *gin.Context) {
 	if len(users) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -100,6 +101,28 @@ func getUserID(c *gin.Context) {
 	})
 }
 
+func filterUsersByAge(c *gin.Context) {
+	ageParam := c.Query("age")
+
+	if ageParam == "" {
+		c.JSON(400, gin.H{"error" : "Chưa nhập tuổi"})
+		return
+	}
+	age, err := strconv.Atoi(ageParam)
+	if err != nil {
+		c.JSON(400, gin.H{"err": "Age không hợp lệ"})
+		return
+	}
+
+	var result []User
+	for _,u := range users {
+		if u.Age == age {
+			result = append(result, u)
+		}
+	}
+	c.JSON(200, result)
+}
+
 func deleteUser(c *gin.Context) {
 	id := c.Param("id")
 	idInt, _ := strconv.Atoi(id)
@@ -123,6 +146,7 @@ func main() {
 	r.POST("/login", login)
 	r.GET("/users", getUsers)
 	r.GET("/user/:id", getUserID)
+	r.GET("/users/filter", filterUsersByAge)
 	r.DELETE("/user/:id", deleteUser)
 	r.Run(":8080")
 }
