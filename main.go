@@ -77,7 +77,7 @@ func login(c *gin.Context) {
 func getUsers(c *gin.Context) {
 	if len(users) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "Không có thông tin user",
+			"message": "Không có thông tin users",
 		})
 		return
 	}
