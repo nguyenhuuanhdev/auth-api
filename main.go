@@ -11,7 +11,7 @@ type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Age int `json:"age"`
+	Age      int    `json:"age"`
 }
 
 var users []User
@@ -73,7 +73,8 @@ func login(c *gin.Context) {
 		"attempts": loginAttempts[input.Username],
 	})
 }
-//get users
+
+// get users
 func getUsers(c *gin.Context) {
 	if len(users) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -84,6 +85,7 @@ func getUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// get user by id
 func getUserID(c *gin.Context) {
 	idParam := c.Param("id")
 
@@ -105,7 +107,7 @@ func filterUsersByAge(c *gin.Context) {
 	ageParam := c.Query("age")
 
 	if ageParam == "" {
-		c.JSON(400, gin.H{"error" : "Chưa nhập tuổi"})
+		c.JSON(400, gin.H{"error": "Chưa nhập tuổi"})
 		return
 	}
 	age, err := strconv.Atoi(ageParam)
@@ -115,7 +117,7 @@ func filterUsersByAge(c *gin.Context) {
 	}
 
 	var result []User
-	for _,u := range users {
+	for _, u := range users {
 		if u.Age == age {
 			result = append(result, u)
 		}
