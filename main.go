@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 	"strconv"
-
+	"time"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +18,7 @@ type User struct {
 var users []User
 var nextID = 1
 var loginAttempts = make(map[string]int)
+var jwtKey = []byte("my_secret_key")
 
 func register(c *gin.Context) {
 	var input User
